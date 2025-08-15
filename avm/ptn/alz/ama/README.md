@@ -49,7 +49,7 @@ module ama 'br/public:avm/ptn/alz/ama:<version>' = {
     dataCollectionRuleChangeTrackingName: 'alz-ama-dcr-ct-alzamamin'
     dataCollectionRuleMDFCSQLName: 'alz-ama-dcr-mdfc-sql-alzamamin'
     dataCollectionRuleVMInsightsName: 'alz-ama-dcr-vm-insights-alzamamin'
-    logAnalyticsWorkspaceId: 'alz-ama-law-alzamamin'
+    logAnalyticsWorkspaceResourceId: 'alz-ama-law-alzamamin'
     userAssignedIdentityName: 'alz-ama-identity-alzamamin'
   }
 }
@@ -77,7 +77,7 @@ module ama 'br/public:avm/ptn/alz/ama:<version>' = {
     "dataCollectionRuleVMInsightsName": {
       "value": "alz-ama-dcr-vm-insights-alzamamin"
     },
-    "logAnalyticsWorkspaceId": {
+    "logAnalyticsWorkspaceResourceId": {
       "value": "alz-ama-law-alzamamin"
     },
     "userAssignedIdentityName": {
@@ -101,7 +101,7 @@ using 'br/public:avm/ptn/alz/ama:<version>'
 param dataCollectionRuleChangeTrackingName = 'alz-ama-dcr-ct-alzamamin'
 param dataCollectionRuleMDFCSQLName = 'alz-ama-dcr-mdfc-sql-alzamamin'
 param dataCollectionRuleVMInsightsName = 'alz-ama-dcr-vm-insights-alzamamin'
-param logAnalyticsWorkspaceId = 'alz-ama-law-alzamamin'
+param logAnalyticsWorkspaceResourceId = 'alz-ama-law-alzamamin'
 param userAssignedIdentityName = 'alz-ama-identity-alzamamin'
 ```
 
@@ -125,7 +125,7 @@ module ama 'br/public:avm/ptn/alz/ama:<version>' = {
     dataCollectionRuleChangeTrackingName: 'alz-ama-dcr-ct-alzamamax'
     dataCollectionRuleMDFCSQLName: 'alz-ama-dcr-mdfc-sql-alzamamax'
     dataCollectionRuleVMInsightsName: 'alz-ama-dcr-vm-insights-alzamamax'
-    logAnalyticsWorkspaceId: 'alz-ama-law-alzamamax'
+    logAnalyticsWorkspaceResourceId: 'alz-ama-law-alzamamax'
     userAssignedIdentityName: 'alz-ama-identity-alzamamax'
     // Non-required parameters
     location: '<location>'
@@ -163,7 +163,7 @@ module ama 'br/public:avm/ptn/alz/ama:<version>' = {
     "dataCollectionRuleVMInsightsName": {
       "value": "alz-ama-dcr-vm-insights-alzamamax"
     },
-    "logAnalyticsWorkspaceId": {
+    "logAnalyticsWorkspaceResourceId": {
       "value": "alz-ama-law-alzamamax"
     },
     "userAssignedIdentityName": {
@@ -203,7 +203,7 @@ using 'br/public:avm/ptn/alz/ama:<version>'
 param dataCollectionRuleChangeTrackingName = 'alz-ama-dcr-ct-alzamamax'
 param dataCollectionRuleMDFCSQLName = 'alz-ama-dcr-mdfc-sql-alzamamax'
 param dataCollectionRuleVMInsightsName = 'alz-ama-dcr-vm-insights-alzamamax'
-param logAnalyticsWorkspaceId = 'alz-ama-law-alzamamax'
+param logAnalyticsWorkspaceResourceId = 'alz-ama-law-alzamamax'
 param userAssignedIdentityName = 'alz-ama-identity-alzamamax'
 // Non-required parameters
 param location = '<location>'
@@ -229,7 +229,7 @@ param tags = {
 | [`dataCollectionRuleChangeTrackingName`](#parameter-datacollectionrulechangetrackingname) | string | The name of the data collection rule for Change Tracking. |
 | [`dataCollectionRuleMDFCSQLName`](#parameter-datacollectionrulemdfcsqlname) | string | The name of the data collection rule for Microsoft Defender for SQL. |
 | [`dataCollectionRuleVMInsightsName`](#parameter-datacollectionrulevminsightsname) | string | The name of the data collection rule for VM Insights. |
-| [`logAnalyticsWorkspaceId`](#parameter-loganalyticsworkspaceid) | string | The resource ID of the Log Analytics Workspace. |
+| [`logAnalyticsWorkspaceResourceId`](#parameter-loganalyticsworkspaceresourceid) | string | The resource ID of the Log Analytics Workspace. |
 | [`userAssignedIdentityName`](#parameter-userassignedidentityname) | string | The name of the User Assigned Identity utilized for Azure Monitoring Agent. |
 
 **Optional parameters**
@@ -262,7 +262,7 @@ The name of the data collection rule for VM Insights.
 - Required: Yes
 - Type: string
 
-### Parameter: `logAnalyticsWorkspaceId`
+### Parameter: `logAnalyticsWorkspaceResourceId`
 
 The resource ID of the Log Analytics Workspace.
 
