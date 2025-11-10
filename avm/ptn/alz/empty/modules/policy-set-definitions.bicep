@@ -6,6 +6,7 @@ targetScope = 'managementGroup'
 @description('Optional. Policy set definitions to create on the management group.')
 param managementGroupCustomPolicySetDefinitions policySetDefinitionsType[]?
 
+@retryOn(['DeploymentFailed', 'InternalServerError','InvalidResourceReference','NotFound','ResourceNotFound'], 3)
 resource mgCustomPolicySetDefinitions 'Microsoft.Authorization/policySetDefinitions@2025-01-01' = [
   for (polSetDef, index) in (managementGroupCustomPolicySetDefinitions ?? []): {
     name: polSetDef.name

@@ -224,14 +224,7 @@ resource mgExisting 'Microsoft.Management/managementGroups@2023-04-01' existing 
   name: managementGroupName
 }
 
-// N x Subscription Placement in Management Group Created or Existing (Optional)
-@batchSize(1)
-module mgSubPlacementWait 'modules/wait.bicep' = [
-  for (item, index) in range(0, waitForConsistencyCounterBeforeSubPlacement): if (waitForConsistencyCounterBeforeSubPlacement > 0 && !empty(subscriptionsToPlaceInManagementGroup)) {
-    name: '${deploymentNames.mgSubPlacementWait}-${index}'
-  }
-]
-
+@retryOn(['DeploymentFailed', 'InternalServerError','InvalidResourceReference','NotFound','ResourceNotFound'], 3)
 resource mgSubPlacement 'Microsoft.Management/managementGroups/subscriptions@2023-04-01' = [
   for (sub, i) in subscriptionsToPlaceInManagementGroup: {
     scope: tenant()
