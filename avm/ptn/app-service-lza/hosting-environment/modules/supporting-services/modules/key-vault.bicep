@@ -4,7 +4,7 @@ targetScope = 'resourceGroup'
 //    PARAMETERS
 // ------------------
 
-import { diagnosticSettingFullType } from 'br/public:avm/utl/types/avm-common-types:0.5.1'
+import { diagnosticSettingFullType } from 'br/public:avm/utl/types/avm-common-types:0.7.0'
 
 @description('The location where the resources will be created.')
 param location string = resourceGroup().location
@@ -33,6 +33,7 @@ param keyVaultPrivateEndpointName string = 'keyvault-pep'
 @description('Optional. Diagnostic Settings for the Key Vault.')
 param diagnosticSettings diagnosticSettingFullType[]?
 
+@description('Required. The principal ID of the App Service managed identity to grant Key Vault access.')
 param appServiceManagedIdentityPrincipalId string
 
 // ------------------
@@ -64,17 +65,17 @@ var virtualNetworkLinks = concat(
 // RESOURCES
 // ------------------
 
-resource vnetSpoke 'Microsoft.Network/virtualNetworks@2022-01-01' existing = {
+resource vnetSpoke 'Microsoft.Network/virtualNetworks@2025-05-01' existing = {
   scope: resourceGroup(spokeSubscriptionId, spokeResourceGroupName)
   name: spokeVNetName
 }
 
-resource spokePrivateEndpointSubnet 'Microsoft.Network/virtualNetworks/subnets@2022-07-01' existing = {
+resource spokePrivateEndpointSubnet 'Microsoft.Network/virtualNetworks/subnets@2025-05-01' existing = {
   parent: vnetSpoke
   name: spokePrivateEndpointSubnetName
 }
 
-module vaultdnszone 'br/public:avm/res/network/private-dns-zone:0.7.0' = {
+module vaultdnszone 'br/public:avm/res/network/private-dns-zone:0.8.0' = {
   name: 'keyvaultDnsZoneDeployment-${uniqueString(resourceGroup().id)}'
   params: {
     name: vaultDnsZoneName
@@ -85,7 +86,7 @@ module vaultdnszone 'br/public:avm/res/network/private-dns-zone:0.7.0' = {
   }
 }
 
-module keyvault 'br/public:avm/res/key-vault/vault:0.12.1' = {
+module keyvault 'br/public:avm/res/key-vault/vault:0.13.3' = {
   name: 'vault-${uniqueString(resourceGroup().id)}'
   params: {
     name: keyVaultName
@@ -99,7 +100,7 @@ module keyvault 'br/public:avm/res/key-vault/vault:0.12.1' = {
     }
     enableSoftDelete: true
     softDeleteRetentionInDays: 7
-    enablePurgeProtection: null
+    enablePurgeProtection: false
     publicNetworkAccess: 'Disabled'
     enableRbacAuthorization: true
     enableVaultForDeployment: true
