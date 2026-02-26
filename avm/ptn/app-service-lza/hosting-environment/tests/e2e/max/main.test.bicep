@@ -1,5 +1,5 @@
-metadata name = 'WAF-aligned'
-metadata description = 'This instance deploys the module with WAF aligned settings.'
+metadata name = 'Using all parameters.'
+metadata description = 'This instance deploys the module with the maximum set of parameters, exercising the Application Gateway networking option and Linux container workload.'
 
 targetScope = 'subscription'
 
@@ -12,7 +12,7 @@ targetScope = 'subscription'
 param diagnosticsResourceGroupName string = 'diag-appservicelza-${serviceShort}-rg'
 
 @description('Optional. A short identifier for the kind of deployment. Should be kept short to not run into resource-name length-constraints.')
-param serviceShort string = 'appwaf'
+param serviceShort string = 'applzamax'
 
 @description('Optional. Test name prefix.')
 param namePrefix string = '#_namePrefix_#'
@@ -57,7 +57,19 @@ module testDeployment '../../../main.bicep' = [
       logAnalyticsWorkspaceResourceId: diagnosticDependencies.outputs.logAnalyticsWorkspaceResourceId
       tags: {
         environment: 'test'
+        scenario: 'max'
       }
+
+      // Networking: Application Gateway path
+      networkingOption: 'applicationGateway'
+      subnetSpokeAppGwAddressSpace: '10.240.12.0/24'
+
+      // Linux container workload
+      webAppBaseOs: 'linux'
+      webAppKind: 'app,linux,container'
+      containerImageName: 'mcr.microsoft.com/appsvc/staticsite:latest'
+
+      // Diagnostic settings
       aseDiagnosticSettings: [
         {
           eventHubName: diagnosticDependencies.outputs.eventHubNamespaceEventHubName
@@ -102,7 +114,7 @@ module testDeployment '../../../main.bicep' = [
           ]
         }
       ]
-      frontDoorDiagnosticSettings: [
+      appGatewayDiagnosticSettings: [
         {
           eventHubName: diagnosticDependencies.outputs.eventHubNamespaceEventHubName
           eventHubAuthorizationRuleResourceId: diagnosticDependencies.outputs.eventHubAuthorizationRuleId
@@ -110,17 +122,35 @@ module testDeployment '../../../main.bicep' = [
           workspaceResourceId: diagnosticDependencies.outputs.logAnalyticsWorkspaceResourceId
           logCategoriesAndGroups: [
             {
-              category: 'FrontdoorAccessLog'
+              categoryGroup: 'allLogs'
             }
+          ]
+          metricCategories: [
             {
-              category: 'FrontdoorWebApplicationFirewallLog'
+              category: 'AllMetrics'
             }
           ]
         }
       ]
+      keyVaultDiagnosticSettings: [
+        {
+          eventHubName: diagnosticDependencies.outputs.eventHubNamespaceEventHubName
+          eventHubAuthorizationRuleResourceId: diagnosticDependencies.outputs.eventHubAuthorizationRuleId
+          storageAccountResourceId: diagnosticDependencies.outputs.storageAccountResourceId
+          workspaceResourceId: diagnosticDependencies.outputs.logAnalyticsWorkspaceResourceId
+          logCategoriesAndGroups: [
+            {
+              categoryGroup: 'allLogs'
+            }
+          ]
+        }
+      ]
+
+      // VM / Jump host settings
       vmSize: 'Standard_D2s_v4'
       adminUsername: 'azureuser'
       adminPassword: password
+      vmJumpboxOSType: 'linux'
       enableEgressLockdown: true
       location: enforcedLocation
     }

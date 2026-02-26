@@ -21,6 +21,25 @@ param password string = newGuid()
 #disable-next-line no-hardcoded-location
 var enforcedLocation = 'australiaeast'
 
+// Diagnostics
+// ===========
+resource diagnosticsResourceGroup 'Microsoft.Resources/resourceGroups@2025-04-01' = {
+  name: 'diag-appservicelza-${serviceShort}-rg'
+  location: enforcedLocation
+}
+
+module diagnosticDependencies '../../../../../../../utilities/e2e-template-assets/templates/diagnostic.dependencies.bicep' = {
+  scope: diagnosticsResourceGroup
+  name: '${uniqueString(deployment().name, enforcedLocation)}-diagnosticDependencies'
+  params: {
+    storageAccountName: 'dep${namePrefix}diasa${serviceShort}03'
+    logAnalyticsWorkspaceName: 'dep-${namePrefix}-law-${serviceShort}'
+    eventHubNamespaceEventHubName: 'dep-${namePrefix}-evh-${serviceShort}01'
+    eventHubNamespaceName: 'dep-${namePrefix}-evhns-${serviceShort}01'
+    location: enforcedLocation
+  }
+}
+
 // ============== //
 // Test Execution //
 // ============== //
@@ -31,6 +50,7 @@ module testDeployment '../../../main.bicep' = [
     name: '${uniqueString(deployment().name, enforcedLocation)}-test-${serviceShort}-${iteration}'
     params: {
       workloadName: take('${namePrefix}${serviceShort}', 10)
+      logAnalyticsWorkspaceResourceId: diagnosticDependencies.outputs.logAnalyticsWorkspaceResourceId
       vmSize: 'Standard_D2s_v4'
       adminUsername: 'azureuser'
       adminPassword: password
