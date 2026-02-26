@@ -1,9 +1,11 @@
 targetScope = 'resourceGroup'
 
-// reference to the BICEP naming module
-param naming object
+import { NamingOutput } from '../naming/naming.module.bicep'
 
-@description('Azure region where the resources will be deployed in')
+@description('Required. The naming convention output object from the naming module.')
+param naming NamingOutput
+
+@description('Optional. Location for all resources.')
 param location string = resourceGroup().location
 
 @description('Required. Whether to enable deployment telemetry.')
@@ -12,35 +14,48 @@ param enableTelemetry bool
 @description('Optional, default is false. Set to true if you want to deploy ASE v3 instead of Multitenant App Service Plan.')
 param deployAseV3 bool = false
 
-@description('CIDR of the SPOKE vnet i.e. 192.168.0.0/24')
+@description('Required. CIDR of the SPOKE vnet i.e. 192.168.0.0/24.')
 param vnetSpokeAddressSpace string
 
-@description('CIDR of the subnet that will hold the app services plan')
+@description('Required. CIDR of the subnet that will hold the app services plan.')
 param subnetSpokeAppSvcAddressSpace string
 
-@description('CIDR of the subnet that will hold the private endpoints of the supporting services')
+@description('Required. CIDR of the subnet that will hold the private endpoints of the supporting services.')
 param subnetSpokePrivateEndpointAddressSpace string
 
-@description('Internal IP of the Azure firewall deployed in Hub. Used for creating UDR to route all vnet egress traffic through Firewall. If empty no UDR')
+@description('Optional. CIDR of the subnet that will hold the Application Gateway. Required if networkingOption is "applicationGateway".')
+param subnetSpokeAppGwAddressSpace string = ''
+
+@description('Optional. Internal IP of the Azure firewall deployed in Hub. Used for creating UDR to route all vnet egress traffic through Firewall. If empty no UDR.')
 param firewallInternalIp string = ''
 
-@description('Resource tags that we might need to add to all resources (i.e. Environment, Cost center, application name etc)')
+@description('Optional. Resource tags that we might need to add to all resources (i.e. Environment, Cost center, application name etc).')
 param tags object
 
-@description('Create (or not) a UDR for the App Service Subnet, to route all egress traffic through Hub Azure Firewall')
+@description('Required. Create (or not) a UDR for the App Service Subnet, to route all egress traffic through Hub Azure Firewall.')
 param enableEgressLockdown bool
 
+@description('Optional. The networking option to use. Options: frontDoor, applicationGateway, none.')
+@allowed(['frontDoor', 'applicationGateway', 'none'])
+param networkingOption string = 'frontDoor'
+
+@description('Required. The resource ID of the Log Analytics workspace for diagnostic settings.')
 param logAnalyticsWorkspaceId string
 
+@description('Optional. The resource ID of the hub VNet. If not empty, VNet peering will be configured.')
 param hubVnetResourceId string = ''
+
+var deployAppGw = networkingOption == 'applicationGateway'
 
 var resourceNames = {
   vnetSpoke: take('${naming.virtualNetwork.name}-spoke', 80)
   snetAppSvc: 'snet-appSvc-${naming.virtualNetwork.name}-spoke'
   snetDevOps: 'snet-devOps-${naming.virtualNetwork.name}-spoke'
   snetPe: 'snet-pe-${naming.virtualNetwork.name}-spoke'
+  snetAppGw: 'snet-appGw-${naming.virtualNetwork.name}-spoke'
   pepNsg: take('${naming.networkSecurityGroup.name}-pep', 80)
   aseNsg: take('${naming.networkSecurityGroup.name}-ase', 80)
+  appGwNsg: take('${naming.networkSecurityGroup.name}-appGw', 80)
   routeTable: naming.routeTable.name
   routeEgressLockdown: '${naming.route.name}-egress-lockdown'
 }
@@ -56,16 +71,16 @@ var udrRoutes = [
   }
 ]
 
-var subnets = [
+var baseSubnets = [
   {
     name: resourceNames.snetAppSvc
     addressPrefix: subnetSpokeAppSvcAddressSpace
     privateEndpointNetworkPolicies: !(deployAseV3) ? 'Enabled' : 'Disabled'
     delegation: !(deployAseV3) ? 'Microsoft.Web/serverfarms' : 'Microsoft.Web/hostingEnvironments'
-    networkSecurityGroupResourceId: !(deployAseV3) ? nsgPep.outputs.resourceId : nsgAse.outputs.resourceId
-    routeTableResourceId: !empty(firewallInternalIp) && (enableEgressLockdown)
-      ? routeTableToFirewall.outputs.resourceId
-      : null
+    networkSecurityGroupResourceId: deployAseV3
+      ? (nsgAse.?outputs.?resourceId ?? '')
+      : nsgPep.outputs.resourceId
+    routeTableResourceId: routeTableToFirewall.?outputs.?resourceId
   }
   {
     name: resourceNames.snetPe
@@ -75,7 +90,19 @@ var subnets = [
   }
 ]
 
-module vnetSpoke 'br/public:avm/res/network/virtual-network:0.5.4' = {
+var appGwSubnet = deployAppGw && !empty(subnetSpokeAppGwAddressSpace)
+  ? [
+      {
+        name: resourceNames.snetAppGw
+        addressPrefix: subnetSpokeAppGwAddressSpace
+        networkSecurityGroupResourceId: nsgAppGw.?outputs.?resourceId ?? ''
+      }
+    ]
+  : []
+
+var subnets = union(baseSubnets, appGwSubnet)
+
+module vnetSpoke 'br/public:avm/res/network/virtual-network:0.7.2' = {
   name: '${uniqueString(deployment().name, location)}-spokevnet'
   params: {
     name: resourceNames.vnetSpoke
@@ -100,7 +127,7 @@ module vnetSpoke 'br/public:avm/res/network/virtual-network:0.5.4' = {
   }
 }
 
-module routeTableToFirewall 'br/public:avm/res/network/route-table:0.4.0' = if (!empty(firewallInternalIp) && (enableEgressLockdown)) {
+module routeTableToFirewall 'br/public:avm/res/network/route-table:0.5.0' = if (!empty(firewallInternalIp) && (enableEgressLockdown)) {
   name: '${uniqueString(deployment().name, location)}-rt'
   params: {
     name: resourceNames.routeTable
@@ -112,7 +139,7 @@ module routeTableToFirewall 'br/public:avm/res/network/route-table:0.4.0' = if (
 }
 
 @description('NSG for the private endpoint subnet.')
-module nsgPep 'br/public:avm/res/network/network-security-group:0.5.0' = {
+module nsgPep 'br/public:avm/res/network/network-security-group:0.5.2' = {
   name: '${uniqueString(deployment().name, location)}-nsgpep'
   params: {
     name: resourceNames.pepNsg
@@ -146,7 +173,7 @@ module nsgPep 'br/public:avm/res/network/network-security-group:0.5.0' = {
 }
 
 @description('NSG for ASE subnet')
-module nsgAse 'br/public:avm/res/network/network-security-group:0.5.0' = if (deployAseV3) {
+module nsgAse 'br/public:avm/res/network/network-security-group:0.5.2' = if (deployAseV3) {
   name: '${uniqueString(deployment().name, location)}-nsgase'
   params: {
     name: resourceNames.aseNsg
@@ -176,8 +203,93 @@ module nsgAse 'br/public:avm/res/network/network-security-group:0.5.0' = if (dep
   }
 }
 
+@description('NSG for Application Gateway subnet')
+module nsgAppGw 'br/public:avm/res/network/network-security-group:0.5.2' = if (deployAppGw) {
+  name: '${uniqueString(deployment().name, location)}-nsgappgw'
+  params: {
+    name: resourceNames.appGwNsg
+    location: location
+    enableTelemetry: enableTelemetry
+    tags: tags
+    securityRules: [
+      {
+        name: 'AllowGatewayManager'
+        properties: {
+          direction: 'Inbound'
+          access: 'Allow'
+          protocol: 'Tcp'
+          sourceAddressPrefix: 'GatewayManager'
+          sourcePortRange: '*'
+          destinationAddressPrefix: '*'
+          destinationPortRange: '65200-65535'
+          priority: 100
+        }
+      }
+      {
+        name: 'AllowHTTPS'
+        properties: {
+          direction: 'Inbound'
+          access: 'Allow'
+          protocol: 'Tcp'
+          sourceAddressPrefix: 'Internet'
+          sourcePortRange: '*'
+          destinationAddressPrefix: '*'
+          destinationPortRange: '443'
+          priority: 110
+        }
+      }
+      {
+        name: 'AllowHTTP'
+        properties: {
+          direction: 'Inbound'
+          access: 'Allow'
+          protocol: 'Tcp'
+          sourceAddressPrefix: 'Internet'
+          sourcePortRange: '*'
+          destinationAddressPrefix: '*'
+          destinationPortRange: '80'
+          priority: 120
+        }
+      }
+      {
+        name: 'AllowAzureLoadBalancer'
+        properties: {
+          direction: 'Inbound'
+          access: 'Allow'
+          protocol: '*'
+          sourceAddressPrefix: 'AzureLoadBalancer'
+          sourcePortRange: '*'
+          destinationAddressPrefix: '*'
+          destinationPortRange: '*'
+          priority: 130
+        }
+      }
+    ]
+    diagnosticSettings: [
+      {
+        workspaceResourceId: logAnalyticsWorkspaceId
+      }
+    ]
+  }
+}
+
+@description('The resource ID of the spoke virtual network.')
 output vnetSpokeResourceId string = vnetSpoke.outputs.resourceId
+
+@description('The name of the spoke virtual network.')
 output vnetSpokeName string = vnetSpoke.outputs.name
+
+@description('The resource ID of the App Service subnet.')
 output snetAppSvcResourceId string = vnetSpoke.outputs.subnetResourceIds[0]
+
+@description('The resource ID of the private endpoint subnet.')
 output snetPeResourceId string = vnetSpoke.outputs.subnetResourceIds[1]
+
+@description('The name of the private endpoint subnet.')
 output snetPeName string = vnetSpoke.outputs.subnetNames[1]
+
+@description('The resource ID of the Application Gateway subnet. Empty if not deployed.')
+output snetAppGwResourceId string = deployAppGw && !empty(subnetSpokeAppGwAddressSpace) ? vnetSpoke.outputs.subnetResourceIds[2] : ''
+
+@description('The name of the Application Gateway subnet. Empty if not deployed.')
+output snetAppGwName string = deployAppGw && !empty(subnetSpokeAppGwAddressSpace) ? vnetSpoke.outputs.subnetNames[2] : ''
