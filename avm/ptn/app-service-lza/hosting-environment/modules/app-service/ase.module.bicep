@@ -1,4 +1,12 @@
-import { diagnosticSettingFullType } from 'br/public:avm/utl/types/avm-common-types:0.5.1'
+import {
+  diagnosticSettingLogsOnlyType
+  lockType
+} from 'br/public:avm/utl/types/avm-common-types:0.7.0'
+
+import {
+  virtualNetworkLinkType
+  clusterSettingType
+} from '../shared.types.bicep'
 
 @description('Required. Whether to enable deployment telemetry.')
 param enableTelemetry bool
@@ -10,19 +18,14 @@ param name string
 @description('Optional. Location for all resources.')
 param location string = resourceGroup().location
 
-@allowed([
-  'None'
-  'CanNotDelete'
-  'ReadOnly'
-])
-@description('Optional. Specify the type of lock.')
-param lock string = 'CanNotDelete'
+@description('Optional. Specify the type of resource lock.')
+param lock lockType?
 
 @description('Optional. Resource tags.')
 param tags object = {}
 
 @description('Optional. Custom settings for changing the behavior of the App Service Environment.')
-param clusterSettings array = [
+param clusterSettings clusterSettingType[] = [
   {
     name: 'DisableTls1.0'
     value: '1'
@@ -81,12 +84,12 @@ param subnetResourceId string
 param zoneRedundant bool = false
 
 @description('Optional. Diagnostic Settings for the ASE.')
-param diagnosticSettings diagnosticSettingFullType[]?
+param diagnosticSettings diagnosticSettingLogsOnlyType[]?
 
-@description('Required. The resource ID of the existing virtual network links to the private DNS zone. If not specified, no virtual network links will be created.')
-param virtualNetworkLinks array
+@description('Required. The virtual network links for the ASE private DNS zone.')
+param virtualNetworkLinks virtualNetworkLinkType[]
 
-module ase 'br/public:avm/res/web/hosting-environment:0.3.0' = {
+module ase 'br/public:avm/res/web/hosting-environment:0.5.0' = {
   name: '${uniqueString(deployment().name, location)}-ase-avm'
   params: {
     name: name
@@ -100,21 +103,23 @@ module ase 'br/public:avm/res/web/hosting-environment:0.3.0' = {
     internalLoadBalancingMode: internalLoadBalancingMode
     zoneRedundant: zoneRedundant
     networkConfiguration: {
-      allowNewPrivateEndpointConnections: allowNewPrivateEndpointConnections
-      ftpEnabled: ftpEnabled
-      inboundIpAddressOverride: inboundIpAddressOverride
-      remoteDebugEnabled: remoteDebugEnabled
+      properties: {
+        allowNewPrivateEndpointConnections: allowNewPrivateEndpointConnections
+        ftpEnabled: ftpEnabled
+        inboundIpAddressOverride: inboundIpAddressOverride
+        remoteDebugEnabled: remoteDebugEnabled
+      }
     }
     customDnsSuffixCertificateUrl: customDnsSuffixCertificateUrl
     customDnsSuffixKeyVaultReferenceIdentity: customDnsSuffixKeyVaultReferenceIdentity
     dnsSuffix: !empty(dnsSuffix) ? dnsSuffix : null
     upgradePreference: upgradePreference
     diagnosticSettings: diagnosticSettings
-    lock: { kind: lock, name: '${name}-${lock}-lock' }
+    lock: lock
   }
 }
 
-module asePrivateDnsZone 'br/public:avm/res/network/private-dns-zone:0.7.0' = {
+module asePrivateDnsZone 'br/public:avm/res/network/private-dns-zone:0.8.0' = {
   name: '${uniqueString(deployment().name, location)}-ase-dnszone'
   params: {
     name: '${ase.outputs.name}.appserviceenvironment.net'
@@ -153,7 +158,7 @@ module asePrivateDnsZone 'br/public:avm/res/network/private-dns-zone:0.7.0' = {
   }
 }
 
-resource aseExisting 'Microsoft.Web/hostingEnvironments@2023-12-01' existing = {
+resource aseExisting 'Microsoft.Web/hostingEnvironments@2025-03-01' existing = {
   name: name
 }
 
