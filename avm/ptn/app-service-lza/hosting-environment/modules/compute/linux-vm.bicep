@@ -4,19 +4,41 @@ targetScope = 'resourceGroup'
 //    PARAMETERS
 // ------------------
 
+@description('Required. The name of the virtual machine.')
 param vmName string
+
+@description('Required. The size of the virtual machine (e.g. "Standard_B2s").')
 param vmSize string
+
+@description('Optional. The availability zone for the virtual machine. Set to 0 for no zone.')
 param vmZone int = 0
+
+@description('Required. The name of the virtual network containing the VM subnet.')
 param vmVnetName string
+
+@description('Required. The name of the subnet for the virtual machine.')
 param vmSubnetName string
+
+@description('Required. The address prefix for the VM subnet.')
 param vmSubnetAddressPrefix string
+
+@description('Required. The name of the network security group for the virtual machine.')
 param vmNetworkSecurityGroupName string
+
+@description('Required. The name of the network interface for the virtual machine.')
 param vmNetworkInterfaceName string
+
+@description('Required. The resource ID of the Log Analytics workspace for monitoring.')
 param logAnalyticsWorkspaceResourceId string
+
+@description('Required. The resource ID of the Bastion host. If empty, Bastion-specific NSG rules are not created.')
 param bastionResourceId string
+
+@description('Required. The admin username for the virtual machine.')
 param vmAdminUsername string
 
 @secure()
+@description('Required. The admin password for the virtual machine. Used when authenticationType is "password".')
 param vmAdminPassword string
 
 @description('Optional. Name of the SSH key for the jumpbox.')
@@ -35,9 +57,10 @@ param tags object = {}
 @description('Required. Whether to enable deployment telemetry.')
 param enableTelemetry bool
 
+@description('Optional. The location for the resources.')
 param location string = resourceGroup().location
 
-@description('Optional. The name of the user-assigned identity to be used to generate SSH key for Linux VM. Changing this forces a new resource to be created.')
+@description('Optional. The name of the user-assigned identity used to generate the SSH key for the Linux VM.')
 param sshKeyGenName string = guid(resourceGroup().id, 'userAssignedIdentity')
 
 var roleAssignmentName = guid(resourceGroup().id, 'contributor')
@@ -48,7 +71,7 @@ var contributorRoleDefinitionId = resourceId(
 
 var uami = resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', sshKeyGenName)
 
-module vmNetworkSecurityGroup 'br/public:avm/res/network/network-security-group:0.5.0' = {
+module vmNetworkSecurityGroup 'br/public:avm/res/network/network-security-group:0.5.2' = {
   name: '${uniqueString(deployment().name, location)}-vm-nsg'
   params: {
     name: vmNetworkSecurityGroupName
@@ -110,7 +133,7 @@ module vmNetworkSecurityGroup 'br/public:avm/res/network/network-security-group:
 }
 
 //TODO: Subnet deployment needs to be updated with AVM module once it is available
-module vmSubnet 'br/public:avm/res/network/virtual-network/subnet:0.1.1' = {
+module vmSubnet 'br/public:avm/res/network/virtual-network/subnet:0.1.3' = {
   params: {
     name: vmSubnetName
     virtualNetworkName: vmVnetName
@@ -119,6 +142,7 @@ module vmSubnet 'br/public:avm/res/network/virtual-network/subnet:0.1.1' = {
   }
 }
 
+#disable-next-line use-recent-api-versions
 resource maintenanceConfiguration 'Microsoft.Maintenance/maintenanceConfigurations@2023-10-01-preview' = {
   name: 'linux-mc-${vmName}'
   location: location
@@ -146,8 +170,8 @@ resource maintenanceConfiguration 'Microsoft.Maintenance/maintenanceConfiguratio
   }
 }
 
-@description('The User Assigned Managed Identity that will be given Contributor role on the Resource Group in order to auto-approve the Private Endpoint Connection of the AFD.')
-module userAssignedIdentity 'br/public:avm/res/managed-identity/user-assigned-identity:0.4.0' = {
+@description('The User Assigned Managed Identity used to generate the SSH key for the Linux VM.')
+module userAssignedIdentity 'br/public:avm/res/managed-identity/user-assigned-identity:0.5.0' = {
   name: '${uniqueString(deployment().name, location)}-ssh-uami'
   params: {
     name: sshKeyGenName
@@ -155,8 +179,8 @@ module userAssignedIdentity 'br/public:avm/res/managed-identity/user-assigned-id
   }
 }
 
-@description('The role assignment that will be created to give the User Assigned Managed Identity Contributor role on the Resource Group in order to auto-approve the Private Endpoint Connection of the AFD.')
-resource roleAssignment 'Microsoft.Authorization/roleAssignments@2020-04-01-preview' = {
+@description('The role assignment granting the User Assigned Managed Identity Contributor role on the resource group.')
+resource roleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
   name: roleAssignmentName
   scope: resourceGroup()
   properties: {
@@ -166,7 +190,7 @@ resource roleAssignment 'Microsoft.Authorization/roleAssignments@2020-04-01-prev
   }
 }
 
-resource sshDeploymentScript 'Microsoft.Resources/deploymentScripts@2020-10-01' = {
+resource sshDeploymentScript 'Microsoft.Resources/deploymentScripts@2023-08-01' = {
   name: 'sshDeploymentScriptName'
   location: location
   kind: 'AzurePowerShell'
@@ -177,7 +201,7 @@ resource sshDeploymentScript 'Microsoft.Resources/deploymentScripts@2020-10-01' 
     }
   }
   properties: {
-    azPowerShellVersion: '9.0'
+    azPowerShellVersion: '11.0'
     retentionInterval: 'P1D'
     arguments: '-SSHKeyName "${sshKeyName}" -ResourceGroupName "${resourceGroup().name}"'
     scriptContent: loadTextContent('../../../../../../utilities/e2e-template-assets/scripts/New-SSHKey.ps1')
@@ -187,7 +211,7 @@ resource sshDeploymentScript 'Microsoft.Resources/deploymentScripts@2020-10-01' 
   ]
 }
 
-resource sshKey 'Microsoft.Compute/sshPublicKeys@2022-03-01' = {
+resource sshKey 'Microsoft.Compute/sshPublicKeys@2024-07-01' = {
   name: sshKeyName
   location: location
   properties: {
@@ -195,7 +219,7 @@ resource sshKey 'Microsoft.Compute/sshPublicKeys@2022-03-01' = {
   }
 }
 
-module vm 'br/public:avm/res/compute/virtual-machine:0.12.1' = {
+module vm 'br/public:avm/res/compute/virtual-machine:0.21.0' = {
   name: '${uniqueString(deployment().name, location)}-linux-vm'
   params: {
     name: vmName
@@ -242,7 +266,7 @@ module vm 'br/public:avm/res/compute/virtual-machine:0.12.1' = {
         storageAccountType: 'Premium_LRS'
       }
     }
-    zone: vmZone
+    availabilityZone: vmZone
     vmSize: vmSize
     imageReference: {
       publisher: 'canonical'
@@ -263,7 +287,7 @@ module vm 'br/public:avm/res/compute/virtual-machine:0.12.1' = {
   }
 }
 
-resource dcr 'Microsoft.Insights/dataCollectionRules@2023-03-11' = {
+resource dcr 'Microsoft.Insights/dataCollectionRules@2024-03-11' = {
   name: 'dcr-${vmName}'
   location: location
   kind: 'Linux'
