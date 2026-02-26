@@ -124,15 +124,17 @@ module vmSubnet 'br/public:avm/res/network/virtual-network/subnet:0.1.3' = {
   }
 }
 
-#disable-next-line use-recent-api-versions
-resource maintenanceConfiguration 'Microsoft.Maintenance/maintenanceConfigurations@2023-10-01-preview' = {
-  name: 'win-mc-${vmName}'
-  location: location
-  properties: {
+module maintenanceConfiguration 'br/public:avm/res/maintenance/maintenance-configuration:0.3.2' = {
+  name: '${uniqueString(deployment().name, location)}-win-mc'
+  params: {
+    name: 'win-mc-${vmName}'
+    location: location
+    enableTelemetry: enableTelemetry
+    tags: tags
+    maintenanceScope: 'InGuestPatch'
     extensionProperties: {
       InGuestPatchMode: 'User'
     }
-    maintenanceScope: 'InGuestPatch'
     maintenanceWindow: {
       startDateTime: '2024-06-16 00:00'
       duration: '03:55'
@@ -167,7 +169,7 @@ module vm 'br/public:avm/res/compute/virtual-machine:0.21.0' = {
     enableAutomaticUpdates: true
     patchMode: 'AutomaticByPlatform'
     bypassPlatformSafetyChecksOnUserSchedule: true
-    maintenanceConfigurationResourceId: maintenanceConfiguration.id
+    maintenanceConfigurationResourceId: maintenanceConfiguration.outputs.resourceId
     nicConfigurations: [
       {
         name: vmNetworkInterfaceName
@@ -204,97 +206,101 @@ module vm 'br/public:avm/res/compute/virtual-machine:0.21.0' = {
       dataCollectionRuleAssociations: [
         {
           name: 'SendMetricsToLAW'
-          dataCollectionRuleResourceId: dcr.id
+          dataCollectionRuleResourceId: dcr.outputs.resourceId
         }
       ]
     }
   }
 }
 
-resource dcr 'Microsoft.Insights/dataCollectionRules@2024-03-11' = {
-  name: 'dcr-${vmName}'
-  location: location
-  kind: 'Windows'
-  tags: tags
-  properties: {
-    dataSources: {
-      performanceCounters: [
+module dcr 'br/public:avm/res/insights/data-collection-rule:0.10.0' = {
+  name: '${uniqueString(deployment().name, location)}-win-dcr'
+  params: {
+    name: 'dcr-${vmName}'
+    location: location
+    enableTelemetry: enableTelemetry
+    tags: tags
+    dataCollectionRuleProperties: {
+      kind: 'Windows'
+      dataSources: {
+        performanceCounters: [
+          {
+            streams: [
+              'Microsoft-Perf'
+            ]
+            samplingFrequencyInSeconds: 60
+            counterSpecifiers: [
+              '\\Processor Information(_Total)\\% Processor Time'
+              '\\Processor Information(_Total)\\% Privileged Time'
+              '\\Processor Information(_Total)\\% User Time'
+              '\\Processor Information(_Total)\\Processor Frequency'
+              '\\System\\Processes'
+              '\\Process(_Total)\\Thread Count'
+              '\\Process(_Total)\\Handle Count'
+              '\\System\\System Up Time'
+              '\\System\\Context Switches/sec'
+              '\\System\\Processor Queue Length'
+              '\\Memory\\% Committed Bytes In Use'
+              '\\Memory\\Available Bytes'
+              '\\Memory\\Committed Bytes'
+              '\\Memory\\Cache Bytes'
+              '\\Memory\\Pool Paged Bytes'
+              '\\Memory\\Pool Nonpaged Bytes'
+              '\\Memory\\Pages/sec'
+              '\\Memory\\Page Faults/sec'
+              '\\Process(_Total)\\Working Set'
+              '\\Process(_Total)\\Working Set - Private'
+              '\\LogicalDisk(_Total)\\% Disk Time'
+              '\\LogicalDisk(_Total)\\% Disk Read Time'
+              '\\LogicalDisk(_Total)\\% Disk Write Time'
+              '\\LogicalDisk(_Total)\\% Idle Time'
+              '\\LogicalDisk(_Total)\\Disk Bytes/sec'
+              '\\LogicalDisk(_Total)\\Disk Read Bytes/sec'
+              '\\LogicalDisk(_Total)\\Disk Write Bytes/sec'
+              '\\LogicalDisk(_Total)\\Disk Transfers/sec'
+              '\\LogicalDisk(_Total)\\Disk Reads/sec'
+              '\\LogicalDisk(_Total)\\Disk Writes/sec'
+              '\\LogicalDisk(_Total)\\Avg. Disk sec/Transfer'
+              '\\LogicalDisk(_Total)\\Avg. Disk sec/Read'
+              '\\LogicalDisk(_Total)\\Avg. Disk sec/Write'
+              '\\LogicalDisk(_Total)\\Avg. Disk Queue Length'
+              '\\LogicalDisk(_Total)\\Avg. Disk Read Queue Length'
+              '\\LogicalDisk(_Total)\\Avg. Disk Write Queue Length'
+              '\\LogicalDisk(_Total)\\% Free Space'
+              '\\LogicalDisk(_Total)\\Free Megabytes'
+              '\\Network Interface(*)\\Bytes Total/sec'
+              '\\Network Interface(*)\\Bytes Sent/sec'
+              '\\Network Interface(*)\\Bytes Received/sec'
+              '\\Network Interface(*)\\Packets/sec'
+              '\\Network Interface(*)\\Packets Sent/sec'
+              '\\Network Interface(*)\\Packets Received/sec'
+              '\\Network Interface(*)\\Packets Outbound Errors'
+              '\\Network Interface(*)\\Packets Received Errors'
+            ]
+            name: 'perfCounterDataSource60'
+          }
+        ]
+      }
+      destinations: {
+        logAnalytics: [
+          {
+            workspaceResourceId: logAnalyticsWorkspaceResourceId
+            name: 'la--1264800308'
+          }
+        ]
+      }
+      dataFlows: [
         {
           streams: [
             'Microsoft-Perf'
           ]
-          samplingFrequencyInSeconds: 60
-          counterSpecifiers: [
-            '\\Processor Information(_Total)\\% Processor Time'
-            '\\Processor Information(_Total)\\% Privileged Time'
-            '\\Processor Information(_Total)\\% User Time'
-            '\\Processor Information(_Total)\\Processor Frequency'
-            '\\System\\Processes'
-            '\\Process(_Total)\\Thread Count'
-            '\\Process(_Total)\\Handle Count'
-            '\\System\\System Up Time'
-            '\\System\\Context Switches/sec'
-            '\\System\\Processor Queue Length'
-            '\\Memory\\% Committed Bytes In Use'
-            '\\Memory\\Available Bytes'
-            '\\Memory\\Committed Bytes'
-            '\\Memory\\Cache Bytes'
-            '\\Memory\\Pool Paged Bytes'
-            '\\Memory\\Pool Nonpaged Bytes'
-            '\\Memory\\Pages/sec'
-            '\\Memory\\Page Faults/sec'
-            '\\Process(_Total)\\Working Set'
-            '\\Process(_Total)\\Working Set - Private'
-            '\\LogicalDisk(_Total)\\% Disk Time'
-            '\\LogicalDisk(_Total)\\% Disk Read Time'
-            '\\LogicalDisk(_Total)\\% Disk Write Time'
-            '\\LogicalDisk(_Total)\\% Idle Time'
-            '\\LogicalDisk(_Total)\\Disk Bytes/sec'
-            '\\LogicalDisk(_Total)\\Disk Read Bytes/sec'
-            '\\LogicalDisk(_Total)\\Disk Write Bytes/sec'
-            '\\LogicalDisk(_Total)\\Disk Transfers/sec'
-            '\\LogicalDisk(_Total)\\Disk Reads/sec'
-            '\\LogicalDisk(_Total)\\Disk Writes/sec'
-            '\\LogicalDisk(_Total)\\Avg. Disk sec/Transfer'
-            '\\LogicalDisk(_Total)\\Avg. Disk sec/Read'
-            '\\LogicalDisk(_Total)\\Avg. Disk sec/Write'
-            '\\LogicalDisk(_Total)\\Avg. Disk Queue Length'
-            '\\LogicalDisk(_Total)\\Avg. Disk Read Queue Length'
-            '\\LogicalDisk(_Total)\\Avg. Disk Write Queue Length'
-            '\\LogicalDisk(_Total)\\% Free Space'
-            '\\LogicalDisk(_Total)\\Free Megabytes'
-            '\\Network Interface(*)\\Bytes Total/sec'
-            '\\Network Interface(*)\\Bytes Sent/sec'
-            '\\Network Interface(*)\\Bytes Received/sec'
-            '\\Network Interface(*)\\Packets/sec'
-            '\\Network Interface(*)\\Packets Sent/sec'
-            '\\Network Interface(*)\\Packets Received/sec'
-            '\\Network Interface(*)\\Packets Outbound Errors'
-            '\\Network Interface(*)\\Packets Received Errors'
+          destinations: [
+            'la--1264800308'
           ]
-          name: 'perfCounterDataSource60'
+          transformKql: 'source'
+          outputStream: 'Microsoft-Perf'
         }
       ]
     }
-    destinations: {
-      logAnalytics: [
-        {
-          workspaceResourceId: logAnalyticsWorkspaceResourceId
-          name: 'la--1264800308'
-        }
-      ]
-    }
-    dataFlows: [
-      {
-        streams: [
-          'Microsoft-Perf'
-        ]
-        destinations: [
-          'la--1264800308'
-        ]
-        transformKql: 'source'
-        outputStream: 'Microsoft-Perf'
-      }
-    ]
   }
 }
