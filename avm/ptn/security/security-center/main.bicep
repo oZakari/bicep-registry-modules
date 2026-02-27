@@ -206,7 +206,9 @@ resource pricingTiers 'Microsoft.Security/pricings@2024-01-01' = [
     name: pricing.name
     properties: {
       pricingTier: pricing.pricingTier
-      subPlan: pricing.name == 'VirtualMachines' && pricing.pricingTier == 'Standard' ? 'P2' : null
+      subPlan: pricing.name == 'VirtualMachines' && pricing.pricingTier == 'Standard'
+        ? 'P2'
+        : pricing.name == 'StorageAccounts' && pricing.pricingTier == 'Standard' ? 'DefenderForStorageV2' : null
     }
   }
 ]
