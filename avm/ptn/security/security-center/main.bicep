@@ -50,6 +50,13 @@ param appServicesPricingTier string = 'Free'
 ])
 param storageAccountsPricingTier string = 'Free'
 
+@description('Optional. If the pricing tier value for StorageAccounts is Standard. Choose wether to enable malware scanning on the Storage Accounts or not. - True or False.')
+@allowed([
+  'True'
+  'False'
+])
+param storageAccountsMalwareScanningEnabled string = 'False'
+
 @description('Optional. The pricing tier value for SqlServerVirtualMachines. Azure Security Center is provided in two pricing tiers: free and standard, with the standard tier available with a trial period. The standard tier offers advanced security capabilities, while the free tier offers basic security features. - Free or Standard.')
 @allowed([
   'Free'
@@ -138,6 +145,7 @@ var pricings = [
   {
     name: 'StorageAccounts'
     pricingTier: storageAccountsPricingTier
+    storageAccountsMalwareScanningEnabled: storageAccountsMalwareScanningEnabled
   }
   {
     name: 'SqlServerVirtualMachines'
@@ -209,6 +217,15 @@ resource pricingTiers 'Microsoft.Security/pricings@2024-01-01' = [
       subPlan: pricing.name == 'VirtualMachines' && pricing.pricingTier == 'Standard'
         ? 'P2'
         : pricing.name == 'StorageAccounts' && pricing.pricingTier == 'Standard' ? 'DefenderForStorageV2' : null
+      #disable-next-line BCP187
+      extensions: pricing.name == 'StorageAccounts' && pricing.pricingTier == 'Standard' && pricing.?storageAccountsMalwareScanningEnabled == 'True'
+        ? [
+            {
+              name: 'MalwareScanning'
+              isEnabled: 'True'
+            }
+          ]
+        : null
     }
   }
 ]
