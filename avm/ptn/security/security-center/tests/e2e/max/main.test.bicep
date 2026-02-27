@@ -86,7 +86,11 @@ module testDeployment '../../../main.bicep' = [
       sqlServersPricingTier: 'Standard'
       sqlServerVirtualMachinesPricingTier: 'Standard'
       storageAccountsPricingTier: 'Standard'
-      storageAccountsMalwareScanningEnabled: 'True'
+      storageAccountsMalwareScanningSettings: {
+        onUploadMalwareScanningEnabled: 'True'
+        capGBPerMonthPerStorageAccount: 5000
+        sensitiveDataDiscoveryEnabled: 'True'
+      }
       virtualMachinesPricingTier: 'Standard'
     }
   }

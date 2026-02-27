@@ -50,12 +50,12 @@ param appServicesPricingTier string = 'Free'
 ])
 param storageAccountsPricingTier string = 'Free'
 
-@description('Optional. If the pricing tier value for StorageAccounts is Standard. Choose wether to enable malware scanning on the Storage Accounts or not. - True or False.')
-@allowed([
-  'True'
-  'False'
-])
-param storageAccountsMalwareScanningEnabled string = 'False'
+@description('Optional. If the pricing tier value for StorageAccounts is Standard. Choose the settings for malware scanning.')
+param storageAccountsMalwareScanningSettings {
+  onUploadMalwareScanningEnabled: ('True' | 'False')
+  capGBPerMonthPerStorageAccount: int?
+  sensitiveDataDiscoveryEnabled: ('True' | 'False')
+}?
 
 @description('Optional. The pricing tier value for SqlServerVirtualMachines. Azure Security Center is provided in two pricing tiers: free and standard, with the standard tier available with a trial period. The standard tier offers advanced security capabilities, while the free tier offers basic security features. - Free or Standard.')
 @allowed([
@@ -145,7 +145,7 @@ var pricings = [
   {
     name: 'StorageAccounts'
     pricingTier: storageAccountsPricingTier
-    storageAccountsMalwareScanningEnabled: storageAccountsMalwareScanningEnabled
+    storageAccountsMalwareScanningSettings: storageAccountsMalwareScanningSettings
   }
   {
     name: 'SqlServerVirtualMachines'
@@ -218,18 +218,20 @@ resource pricingTiers 'Microsoft.Security/pricings@2024-01-01' = [
         ? 'P2'
         : pricing.name == 'StorageAccounts' && pricing.pricingTier == 'Standard' ? 'DefenderForStorageV2' : null
       #disable-next-line BCP187
-      extensions: pricing.name == 'StorageAccounts' && pricing.pricingTier == 'Standard' && pricing.?storageAccountsMalwareScanningEnabled == 'True'
+      extensions: pricing.name == 'StorageAccounts' && pricing.pricingTier == 'Standard' && !empty(pricing.?storageAccountsMalwareScanningSettings)
         ? [
             {
               name: 'OnUploadMalwareScanning'
-              isEnabled: 'True'
-              additionalExtensionProperties: {
-                CapGBPerMonthPerStorageAccount: 5000
-              }
+              isEnabled: pricing.?storageAccountsMalwareScanningSettings.?onUploadMalwareScanningEnabled
+              additionalExtensionProperties: (pricing.?storageAccountsMalwareScanningSettings.?capGBPerMonthPerStorageAccount != null)
+                ? {
+                    CapGBPerMonthPerStorageAccount: pricing.?storageAccountsMalwareScanningSettings.?capGBPerMonthPerStorageAccount
+                  }
+                : null
             }
             {
               name: 'SensitiveDataDiscovery'
-              isEnabled: 'True'
+              isEnabled: pricing.?storageAccountsMalwareScanningSettings.?sensitiveDataDiscoveryEnabled
             }
           ]
         : null
