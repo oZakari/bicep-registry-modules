@@ -222,7 +222,7 @@ resource pricingTiers 'Microsoft.Security/pricings@2024-01-01' = [
         ? [
             {
               name: 'MalwareScanning'
-              isEnabled: 'True'
+              isEnabled: storageAccountsMalwareScanningEnabled
             }
           ]
         : null
