@@ -64,6 +64,7 @@ module testDeployment '../../../main.bicep' = [
       sqlServersPricingTier: 'Standard'
       sqlServerVirtualMachinesPricingTier: 'Standard'
       storageAccountsPricingTier: 'Standard'
+      storageAccountsMalwareScanningEnabled: 'True'
       virtualMachinesPricingTier: 'Standard'
     }
   }
