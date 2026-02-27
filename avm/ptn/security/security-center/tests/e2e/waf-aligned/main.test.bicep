@@ -52,6 +52,19 @@ module testDeployment '../../../main.bicep' = [
       scope: '/subscriptions/${subscription().subscriptionId}'
       workspaceResourceId: nestedDependencies.outputs.logAnalyticsWorkspaceResourceId
       location: resourceLocation
+      appServicesPricingTier: 'Standard'
+      dnsPricingTier: 'Standard'
+      armPricingTier: 'Standard'
+      containerRegistryPricingTier: 'Standard'
+      containersTier: 'Standard'
+      cosmosDbsTier: 'Standard'
+      keyVaultsPricingTier: 'Standard'
+      kubernetesServicePricingTier: 'Standard'
+      openSourceRelationalDatabasesTier: 'Standard'
+      sqlServersPricingTier: 'Standard'
+      sqlServerVirtualMachinesPricingTier: 'Standard'
+      storageAccountsPricingTier: 'Standard'
+      virtualMachinesPricingTier: 'Standard'
     }
   }
 ]
