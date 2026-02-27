@@ -36,7 +36,6 @@ module nestedDependencies 'dependencies.bicep' = {
   name: '${uniqueString(deployment().name, resourceLocation)}-nestedDependencies'
   params: {
     location: resourceLocation
-    logAnalyticsWorkspaceName: 'dep-${namePrefix}-law-${serviceShort}'
   }
 }
 
@@ -49,8 +48,6 @@ module testDeployment '../../../main.bicep' = [
   for iteration in ['init', 'idem']: {
     name: '${uniqueString(deployment().name, resourceLocation)}-test-${serviceShort}-${iteration}'
     params: {
-      scope: subscription().id
-      workspaceResourceId: nestedDependencies.outputs.logAnalyticsWorkspaceResourceId
       location: resourceLocation
       securityContactProperties: {
         emails: 'foo@contoso.com'

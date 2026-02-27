@@ -3,19 +3,6 @@ metadata description = 'This module deploys an Azure Security Center (Defender f
 
 targetScope = 'subscription'
 
-@description('Required. The full resource Id of the Log Analytics workspace to save the data in.')
-param workspaceResourceId string
-
-@description('Required. All the VMs in this scope will send their security data to the mentioned workspace unless overridden by a setting with more specific scope.')
-param scope string
-
-@description('Optional. Describes what kind of security agent provisioning action to take. - On or Off.')
-@allowed([
-  'On'
-  'Off'
-])
-param autoProvision string = 'On'
-
 @description('Optional. Device Security group data.')
 param deviceSecurityGroupProperties object = {}
 
@@ -242,13 +229,6 @@ resource pricingTiers 'Microsoft.Security/pricings@2024-01-01' = [
   }
 ]
 
-resource autoProvisioningSettings 'Microsoft.Security/autoProvisioningSettings@2017-08-01-preview' = {
-  name: 'default'
-  properties: {
-    autoProvision: autoProvision
-  }
-}
-
 resource deviceSecurityGroups 'Microsoft.Security/deviceSecurityGroups@2019-08-01' = if (!empty(deviceSecurityGroupProperties)) {
   name: 'deviceSecurityGroups'
   properties: {
@@ -276,20 +256,6 @@ resource securityContacts 'Microsoft.Security/securityContacts@2023-12-01-previe
     notificationsSources: securityContactProperties.notificationsSources
   }
 }
-
-resource workspaceSettings 'Microsoft.Security/workspaceSettings@2017-08-01-preview' = {
-  name: 'default'
-  properties: {
-    workspaceId: workspaceResourceId
-    scope: scope
-  }
-  dependsOn: [
-    autoProvisioningSettings
-  ]
-}
-
-@description('The resource ID of the used log analytics workspace.')
-output workspaceResourceId string = workspaceResourceId
 
 @description('The name of the security center.')
 output name string = 'Security'

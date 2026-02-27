@@ -22,12 +22,10 @@ For examples, please refer to the [Usage Examples](#usage-examples) section.
 
 | Resource Type | API Version | References |
 | :-- | :-- | :-- |
-| `Microsoft.Security/autoProvisioningSettings` | 2017-08-01-preview | <ul style="padding-left: 0px;"><li>[AzAdvertizer](https://www.azadvertizer.net/azresourcetypes/microsoft.security_autoprovisioningsettings.html)</li><li>[Template reference](https://learn.microsoft.com/en-us/azure/templates/Microsoft.Security/2017-08-01-preview/autoProvisioningSettings)</li></ul> |
 | `Microsoft.Security/deviceSecurityGroups` | 2019-08-01 | <ul style="padding-left: 0px;"><li>[AzAdvertizer](https://www.azadvertizer.net/azresourcetypes/microsoft.security_devicesecuritygroups.html)</li><li>[Template reference](https://learn.microsoft.com/en-us/azure/templates/Microsoft.Security/2019-08-01/deviceSecurityGroups)</li></ul> |
 | `Microsoft.Security/iotSecuritySolutions` | 2019-08-01 | <ul style="padding-left: 0px;"><li>[AzAdvertizer](https://www.azadvertizer.net/azresourcetypes/microsoft.security_iotsecuritysolutions.html)</li><li>[Template reference](https://learn.microsoft.com/en-us/azure/templates/Microsoft.Security/2019-08-01/iotSecuritySolutions)</li></ul> |
 | `Microsoft.Security/pricings` | 2024-01-01 | <ul style="padding-left: 0px;"><li>[AzAdvertizer](https://www.azadvertizer.net/azresourcetypes/microsoft.security_pricings.html)</li><li>[Template reference](https://learn.microsoft.com/en-us/azure/templates/Microsoft.Security/2024-01-01/pricings)</li></ul> |
 | `Microsoft.Security/securityContacts` | 2023-12-01-preview | <ul style="padding-left: 0px;"><li>[AzAdvertizer](https://www.azadvertizer.net/azresourcetypes/microsoft.security_securitycontacts.html)</li><li>[Template reference](https://learn.microsoft.com/en-us/azure/templates/Microsoft.Security/2023-12-01-preview/securityContacts)</li></ul> |
-| `Microsoft.Security/workspaceSettings` | 2017-08-01-preview | <ul style="padding-left: 0px;"><li>[AzAdvertizer](https://www.azadvertizer.net/azresourcetypes/microsoft.security_workspacesettings.html)</li><li>[Template reference](https://learn.microsoft.com/en-us/azure/templates/Microsoft.Security/2017-08-01-preview/workspaceSettings)</li></ul> |
 
 ## Usage examples
 
@@ -55,10 +53,6 @@ You can find the full example and the setup of its dependencies in the deploymen
 ```bicep
 module securityCenter 'br/public:avm/ptn/security/security-center:<version>' = {
   params: {
-    // Required parameters
-    scope: '<scope>'
-    workspaceResourceId: '<workspaceResourceId>'
-    // Non-required parameters
     appServicesPricingTier: 'Standard'
     armPricingTier: 'Standard'
     containerRegistryPricingTier: 'Standard'
@@ -94,14 +88,6 @@ module securityCenter 'br/public:avm/ptn/security/security-center:<version>' = {
   "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
-    // Required parameters
-    "scope": {
-      "value": "<scope>"
-    },
-    "workspaceResourceId": {
-      "value": "<workspaceResourceId>"
-    },
-    // Non-required parameters
     "appServicesPricingTier": {
       "value": "Standard"
     },
@@ -165,10 +151,6 @@ module securityCenter 'br/public:avm/ptn/security/security-center:<version>' = {
 ```bicep-params
 using 'br/public:avm/ptn/security/security-center:<version>'
 
-// Required parameters
-param scope = '<scope>'
-param workspaceResourceId = '<workspaceResourceId>'
-// Non-required parameters
 param appServicesPricingTier = 'Standard'
 param armPricingTier = 'Standard'
 param containerRegistryPricingTier = 'Standard'
@@ -207,10 +189,6 @@ You can find the full example and the setup of its dependencies in the deploymen
 ```bicep
 module securityCenter 'br/public:avm/ptn/security/security-center:<version>' = {
   params: {
-    // Required parameters
-    scope: '<scope>'
-    workspaceResourceId: '<workspaceResourceId>'
-    // Non-required parameters
     appServicesPricingTier: 'Standard'
     armPricingTier: 'Standard'
     containerRegistryPricingTier: 'Standard'
@@ -268,14 +246,6 @@ module securityCenter 'br/public:avm/ptn/security/security-center:<version>' = {
   "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
-    // Required parameters
-    "scope": {
-      "value": "<scope>"
-    },
-    "workspaceResourceId": {
-      "value": "<workspaceResourceId>"
-    },
-    // Non-required parameters
     "appServicesPricingTier": {
       "value": "Standard"
     },
@@ -367,10 +337,6 @@ module securityCenter 'br/public:avm/ptn/security/security-center:<version>' = {
 ```bicep-params
 using 'br/public:avm/ptn/security/security-center:<version>'
 
-// Required parameters
-param scope = '<scope>'
-param workspaceResourceId = '<workspaceResourceId>'
-// Non-required parameters
 param appServicesPricingTier = 'Standard'
 param armPricingTier = 'Standard'
 param containerRegistryPricingTier = 'Standard'
@@ -431,10 +397,6 @@ You can find the full example and the setup of its dependencies in the deploymen
 ```bicep
 module securityCenter 'br/public:avm/ptn/security/security-center:<version>' = {
   params: {
-    // Required parameters
-    scope: '<scope>'
-    workspaceResourceId: '<workspaceResourceId>'
-    // Non-required parameters
     appServicesPricingTier: 'Standard'
     armPricingTier: 'Standard'
     containerRegistryPricingTier: 'Standard'
@@ -470,14 +432,6 @@ module securityCenter 'br/public:avm/ptn/security/security-center:<version>' = {
   "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
-    // Required parameters
-    "scope": {
-      "value": "<scope>"
-    },
-    "workspaceResourceId": {
-      "value": "<workspaceResourceId>"
-    },
-    // Non-required parameters
     "appServicesPricingTier": {
       "value": "Standard"
     },
@@ -541,10 +495,6 @@ module securityCenter 'br/public:avm/ptn/security/security-center:<version>' = {
 ```bicep-params
 using 'br/public:avm/ptn/security/security-center:<version>'
 
-// Required parameters
-param scope = '<scope>'
-param workspaceResourceId = '<workspaceResourceId>'
-// Non-required parameters
 param appServicesPricingTier = 'Standard'
 param armPricingTier = 'Standard'
 param containerRegistryPricingTier = 'Standard'
@@ -571,20 +521,12 @@ param virtualMachinesPricingTier = 'Standard'
 
 ## Parameters
 
-**Required parameters**
-
-| Parameter | Type | Description |
-| :-- | :-- | :-- |
-| [`scope`](#parameter-scope) | string | All the VMs in this scope will send their security data to the mentioned workspace unless overridden by a setting with more specific scope. |
-| [`workspaceResourceId`](#parameter-workspaceresourceid) | string | The full resource Id of the Log Analytics workspace to save the data in. |
-
 **Optional parameters**
 
 | Parameter | Type | Description |
 | :-- | :-- | :-- |
 | [`appServicesPricingTier`](#parameter-appservicespricingtier) | string | The pricing tier value for AppServices. Azure Security Center is provided in two pricing tiers: free and standard, with the standard tier available with a trial period. The standard tier offers advanced security capabilities, while the free tier offers basic security features. - Free or Standard. |
 | [`armPricingTier`](#parameter-armpricingtier) | string | The pricing tier value for ARM. Azure Security Center is provided in two pricing tiers: free and standard, with the standard tier available with a trial period. The standard tier offers advanced security capabilities, while the free tier offers basic security features. - Free or Standard. |
-| [`autoProvision`](#parameter-autoprovision) | string | Describes what kind of security agent provisioning action to take. - On or Off. |
 | [`containerRegistryPricingTier`](#parameter-containerregistrypricingtier) | string | The pricing tier value for ContainerRegistry. Azure Security Center is provided in two pricing tiers: free and standard, with the standard tier available with a trial period. The standard tier offers advanced security capabilities, while the free tier offers basic security features. - Free or Standard. |
 | [`containersTier`](#parameter-containerstier) | string | The pricing tier value for containers. Azure Security Center is provided in two pricing tiers: free and standard, with the standard tier available with a trial period. The standard tier offers advanced security capabilities, while the free tier offers basic security features. - Free or Standard. |
 | [`cosmosDbsTier`](#parameter-cosmosdbstier) | string | The pricing tier value for CosmosDbs. Azure Security Center is provided in two pricing tiers: free and standard, with the standard tier available with a trial period. The standard tier offers advanced security capabilities, while the free tier offers basic security features. - Free or Standard. |
@@ -602,20 +544,6 @@ param virtualMachinesPricingTier = 'Standard'
 | [`storageAccountsMalwareScanningSettings`](#parameter-storageaccountsmalwarescanningsettings) | object | If the pricing tier value for StorageAccounts is Standard. Choose the settings for malware scanning. |
 | [`storageAccountsPricingTier`](#parameter-storageaccountspricingtier) | string | The pricing tier value for StorageAccounts. Azure Security Center is provided in two pricing tiers: free and standard, with the standard tier available with a trial period. The standard tier offers advanced security capabilities, while the free tier offers basic security features. - Free or Standard. |
 | [`virtualMachinesPricingTier`](#parameter-virtualmachinespricingtier) | string | The pricing tier value for VMs. Azure Security Center is provided in two pricing tiers: free and standard, with the standard tier available with a trial period. The standard tier offers advanced security capabilities, while the free tier offers basic security features. - Free or Standard. |
-
-### Parameter: `scope`
-
-All the VMs in this scope will send their security data to the mentioned workspace unless overridden by a setting with more specific scope.
-
-- Required: Yes
-- Type: string
-
-### Parameter: `workspaceResourceId`
-
-The full resource Id of the Log Analytics workspace to save the data in.
-
-- Required: Yes
-- Type: string
 
 ### Parameter: `appServicesPricingTier`
 
@@ -644,21 +572,6 @@ The pricing tier value for ARM. Azure Security Center is provided in two pricing
   [
     'Free'
     'Standard'
-  ]
-  ```
-
-### Parameter: `autoProvision`
-
-Describes what kind of security agent provisioning action to take. - On or Off.
-
-- Required: No
-- Type: string
-- Default: `'On'`
-- Allowed:
-  ```Bicep
-  [
-    'Off'
-    'On'
   ]
   ```
 
@@ -927,7 +840,6 @@ The pricing tier value for VMs. Azure Security Center is provided in two pricing
 | Output | Type | Description |
 | :-- | :-- | :-- |
 | `name` | string | The name of the security center. |
-| `workspaceResourceId` | string | The resource ID of the used log analytics workspace. |
 
 ## Data Collection
 
