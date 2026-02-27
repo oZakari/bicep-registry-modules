@@ -221,8 +221,15 @@ resource pricingTiers 'Microsoft.Security/pricings@2024-01-01' = [
       extensions: pricing.name == 'StorageAccounts' && pricing.pricingTier == 'Standard' && pricing.?storageAccountsMalwareScanningEnabled == 'True'
         ? [
             {
-              name: 'MalwareScanning'
-              isEnabled: storageAccountsMalwareScanningEnabled
+              name: 'OnUploadMalwareScanning'
+              isEnabled: 'True'
+              additionalExtensionProperties: {
+                CapGBPerMonthPerStorageAccount: 5000
+              }
+            }
+            {
+              name: 'SensitiveDataDiscovery'
+              isEnabled: 'True'
             }
           ]
         : null
