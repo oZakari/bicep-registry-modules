@@ -52,8 +52,11 @@ param storageAccountsPricingTier string = 'Free'
 
 @description('Optional. If the pricing tier value for StorageAccounts is Standard. Choose the settings for malware scanning.')
 param storageAccountsMalwareScanningSettings {
+  @description('Required. Enable or disable on-upload malware scanning for storage accounts. - True or False.')
   onUploadMalwareScanningEnabled: ('True' | 'False')
+  @description('Optional. If on-upload malware scanning is enabled, set a cap for the amount of GB per month per storage account that can be scanned. If not set, there will be no cap applied.')
   capGBPerMonthPerStorageAccount: int?
+  @description('Required. Enable or disable sensitive data discovery for storage accounts. - True or False.')
   sensitiveDataDiscoveryEnabled: ('True' | 'False')
 }?
 
@@ -222,16 +225,16 @@ resource pricingTiers 'Microsoft.Security/pricings@2024-01-01' = [
         ? [
             {
               name: 'OnUploadMalwareScanning'
-              isEnabled: pricing.?storageAccountsMalwareScanningSettings.?onUploadMalwareScanningEnabled
-              additionalExtensionProperties: (pricing.?storageAccountsMalwareScanningSettings.?capGBPerMonthPerStorageAccount != null)
+              isEnabled: storageAccountsMalwareScanningSettings.?onUploadMalwareScanningEnabled
+              additionalExtensionProperties: (storageAccountsMalwareScanningSettings.?capGBPerMonthPerStorageAccount != null)
                 ? {
-                    CapGBPerMonthPerStorageAccount: pricing.?storageAccountsMalwareScanningSettings.?capGBPerMonthPerStorageAccount
+                    CapGBPerMonthPerStorageAccount: storageAccountsMalwareScanningSettings.?capGBPerMonthPerStorageAccount
                   }
                 : null
             }
             {
               name: 'SensitiveDataDiscovery'
-              isEnabled: pricing.?storageAccountsMalwareScanningSettings.?sensitiveDataDiscoveryEnabled
+              isEnabled: storageAccountsMalwareScanningSettings.?sensitiveDataDiscoveryEnabled
             }
           ]
         : null

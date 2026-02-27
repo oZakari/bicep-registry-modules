@@ -1,11 +1,12 @@
 {
   "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
+  "languageVersion": "2.0",
   "contentVersion": "1.0.0.0",
   "metadata": {
     "_generator": {
       "name": "bicep",
-      "version": "0.40.2.10011",
-      "templateHash": "5474392061589374063"
+      "version": "0.41.2.15936",
+      "templateHash": "14360691471380967047"
     },
     "name": "Azure Security Center (Defender for Cloud)",
     "description": "This module deploys an Azure Security Center (Defender for Cloud) Configuration."
@@ -90,6 +91,42 @@
       ],
       "metadata": {
         "description": "Optional. The pricing tier value for StorageAccounts. Azure Security Center is provided in two pricing tiers: free and standard, with the standard tier available with a trial period. The standard tier offers advanced security capabilities, while the free tier offers basic security features. - Free or Standard."
+      }
+    },
+    "storageAccountsMalwareScanningSettings": {
+      "type": "object",
+      "properties": {
+        "onUploadMalwareScanningEnabled": {
+          "type": "string",
+          "allowedValues": [
+            "False",
+            "True"
+          ],
+          "metadata": {
+            "description": "Required. Enable or disable on-upload malware scanning for storage accounts. - True or False."
+          }
+        },
+        "capGBPerMonthPerStorageAccount": {
+          "type": "int",
+          "nullable": true,
+          "metadata": {
+            "description": "Optional. If on-upload malware scanning is enabled, set a cap for the amount of GB per month per storage account that can be scanned. If not set, there will be no cap applied."
+          }
+        },
+        "sensitiveDataDiscoveryEnabled": {
+          "type": "string",
+          "allowedValues": [
+            "False",
+            "True"
+          ],
+          "metadata": {
+            "description": "Required. Enable or disable sensitive data discovery for storage accounts. - True or False."
+          }
+        }
+      },
+      "nullable": true,
+      "metadata": {
+        "description": "Optional. If the pricing tier value for StorageAccounts is Standard. Choose the settings for malware scanning."
       }
     },
     "sqlServerVirtualMachinesPricingTier": {
@@ -229,7 +266,8 @@
       },
       {
         "name": "StorageAccounts",
-        "pricingTier": "[parameters('storageAccountsPricingTier')]"
+        "pricingTier": "[parameters('storageAccountsPricingTier')]",
+        "storageAccountsMalwareScanningSettings": "[parameters('storageAccountsMalwareScanningSettings')]"
       },
       {
         "name": "SqlServerVirtualMachines",
@@ -269,8 +307,8 @@
       }
     ]
   },
-  "resources": [
-    {
+  "resources": {
+    "avmTelemetry": {
       "condition": "[parameters('enableTelemetry')]",
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2024-03-01",
@@ -291,7 +329,7 @@
         }
       }
     },
-    {
+    "pricingTiers": {
       "copy": {
         "name": "pricingTiers",
         "count": "[length(variables('pricings'))]",
@@ -303,10 +341,11 @@
       "name": "[variables('pricings')[copyIndex()].name]",
       "properties": {
         "pricingTier": "[variables('pricings')[copyIndex()].pricingTier]",
-        "subPlan": "[if(and(equals(variables('pricings')[copyIndex()].name, 'VirtualMachines'), equals(variables('pricings')[copyIndex()].pricingTier, 'Standard')), 'P2', null())]"
+        "subPlan": "[if(and(equals(variables('pricings')[copyIndex()].name, 'VirtualMachines'), equals(variables('pricings')[copyIndex()].pricingTier, 'Standard')), 'P2', if(and(equals(variables('pricings')[copyIndex()].name, 'StorageAccounts'), equals(variables('pricings')[copyIndex()].pricingTier, 'Standard')), 'DefenderForStorageV2', null()))]",
+        "extensions": "[if(and(and(equals(variables('pricings')[copyIndex()].name, 'StorageAccounts'), equals(variables('pricings')[copyIndex()].pricingTier, 'Standard')), not(empty(tryGet(variables('pricings')[copyIndex()], 'storageAccountsMalwareScanningSettings')))), createArray(createObject('name', 'OnUploadMalwareScanning', 'isEnabled', tryGet(parameters('storageAccountsMalwareScanningSettings'), 'onUploadMalwareScanningEnabled'), 'additionalExtensionProperties', if(not(equals(tryGet(parameters('storageAccountsMalwareScanningSettings'), 'capGBPerMonthPerStorageAccount'), null())), createObject('CapGBPerMonthPerStorageAccount', tryGet(parameters('storageAccountsMalwareScanningSettings'), 'capGBPerMonthPerStorageAccount')), null())), createObject('name', 'SensitiveDataDiscovery', 'isEnabled', tryGet(parameters('storageAccountsMalwareScanningSettings'), 'sensitiveDataDiscoveryEnabled'))), null())]"
       }
     },
-    {
+    "autoProvisioningSettings": {
       "type": "Microsoft.Security/autoProvisioningSettings",
       "apiVersion": "2017-08-01-preview",
       "name": "default",
@@ -314,7 +353,7 @@
         "autoProvision": "[parameters('autoProvision')]"
       }
     },
-    {
+    "deviceSecurityGroups": {
       "condition": "[not(empty(parameters('deviceSecurityGroupProperties')))]",
       "type": "Microsoft.Security/deviceSecurityGroups",
       "apiVersion": "2019-08-01",
@@ -326,7 +365,7 @@
         "denylistRules": "[parameters('deviceSecurityGroupProperties').denylistRules]"
       }
     },
-    {
+    "securityContacts": {
       "condition": "[not(empty(parameters('securityContactProperties')))]",
       "type": "Microsoft.Security/securityContacts",
       "apiVersion": "2023-12-01-preview",
@@ -338,7 +377,7 @@
         "notificationsSources": "[parameters('securityContactProperties').notificationsSources]"
       }
     },
-    {
+    "workspaceSettings": {
       "type": "Microsoft.Security/workspaceSettings",
       "apiVersion": "2017-08-01-preview",
       "name": "default",
@@ -347,10 +386,10 @@
         "scope": "[parameters('scope')]"
       },
       "dependsOn": [
-        "[subscriptionResourceId('Microsoft.Security/autoProvisioningSettings', 'default')]"
+        "autoProvisioningSettings"
       ]
     },
-    {
+    "iotSecuritySolutions": {
       "condition": "[not(empty(parameters('ioTSecuritySolutionProperties')))]",
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2025-04-01",
@@ -372,8 +411,8 @@
           "metadata": {
             "_generator": {
               "name": "bicep",
-              "version": "0.40.2.10011",
-              "templateHash": "18136654087771599249"
+              "version": "0.41.2.15936",
+              "templateHash": "17079556367070596295"
             }
           },
           "parameters": {
@@ -406,7 +445,7 @@
         }
       }
     }
-  ],
+  },
   "outputs": {
     "workspaceResourceId": {
       "type": "string",

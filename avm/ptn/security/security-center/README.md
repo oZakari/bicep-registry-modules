@@ -25,8 +25,8 @@ For examples, please refer to the [Usage Examples](#usage-examples) section.
 | `Microsoft.Security/autoProvisioningSettings` | 2017-08-01-preview | <ul style="padding-left: 0px;"><li>[AzAdvertizer](https://www.azadvertizer.net/azresourcetypes/microsoft.security_autoprovisioningsettings.html)</li><li>[Template reference](https://learn.microsoft.com/en-us/azure/templates/Microsoft.Security/2017-08-01-preview/autoProvisioningSettings)</li></ul> |
 | `Microsoft.Security/deviceSecurityGroups` | 2019-08-01 | <ul style="padding-left: 0px;"><li>[AzAdvertizer](https://www.azadvertizer.net/azresourcetypes/microsoft.security_devicesecuritygroups.html)</li><li>[Template reference](https://learn.microsoft.com/en-us/azure/templates/Microsoft.Security/2019-08-01/deviceSecurityGroups)</li></ul> |
 | `Microsoft.Security/iotSecuritySolutions` | 2019-08-01 | <ul style="padding-left: 0px;"><li>[AzAdvertizer](https://www.azadvertizer.net/azresourcetypes/microsoft.security_iotsecuritysolutions.html)</li><li>[Template reference](https://learn.microsoft.com/en-us/azure/templates/Microsoft.Security/2019-08-01/iotSecuritySolutions)</li></ul> |
-| `Microsoft.Security/pricings` | 2018-06-01 | <ul style="padding-left: 0px;"><li>[AzAdvertizer](https://www.azadvertizer.net/azresourcetypes/microsoft.security_pricings.html)</li><li>[Template reference](https://learn.microsoft.com/en-us/azure/templates/Microsoft.Security/2018-06-01/pricings)</li></ul> |
-| `Microsoft.Security/securityContacts` | 2017-08-01-preview | <ul style="padding-left: 0px;"><li>[AzAdvertizer](https://www.azadvertizer.net/azresourcetypes/microsoft.security_securitycontacts.html)</li><li>[Template reference](https://learn.microsoft.com/en-us/azure/templates/Microsoft.Security/2017-08-01-preview/securityContacts)</li></ul> |
+| `Microsoft.Security/pricings` | 2024-01-01 | <ul style="padding-left: 0px;"><li>[AzAdvertizer](https://www.azadvertizer.net/azresourcetypes/microsoft.security_pricings.html)</li><li>[Template reference](https://learn.microsoft.com/en-us/azure/templates/Microsoft.Security/2024-01-01/pricings)</li></ul> |
+| `Microsoft.Security/securityContacts` | 2023-12-01-preview | <ul style="padding-left: 0px;"><li>[AzAdvertizer](https://www.azadvertizer.net/azresourcetypes/microsoft.security_securitycontacts.html)</li><li>[Template reference](https://learn.microsoft.com/en-us/azure/templates/Microsoft.Security/2023-12-01-preview/securityContacts)</li></ul> |
 | `Microsoft.Security/workspaceSettings` | 2017-08-01-preview | <ul style="padding-left: 0px;"><li>[AzAdvertizer](https://www.azadvertizer.net/azresourcetypes/microsoft.security_workspacesettings.html)</li><li>[Template reference](https://learn.microsoft.com/en-us/azure/templates/Microsoft.Security/2017-08-01-preview/workspaceSettings)</li></ul> |
 
 ## Usage examples
@@ -59,7 +59,25 @@ module securityCenter 'br/public:avm/ptn/security/security-center:<version>' = {
     scope: '<scope>'
     workspaceResourceId: '<workspaceResourceId>'
     // Non-required parameters
+    appServicesPricingTier: 'Standard'
+    armPricingTier: 'Standard'
+    containerRegistryPricingTier: 'Standard'
+    containersTier: 'Standard'
+    cosmosDbsTier: 'Standard'
+    dnsPricingTier: 'Standard'
+    keyVaultsPricingTier: 'Standard'
+    kubernetesServicePricingTier: 'Standard'
     location: '<location>'
+    openSourceRelationalDatabasesTier: 'Standard'
+    sqlServersPricingTier: 'Standard'
+    sqlServerVirtualMachinesPricingTier: 'Standard'
+    storageAccountsMalwareScanningSettings: {
+      capGBPerMonthPerStorageAccount: 5000
+      onUploadMalwareScanningEnabled: 'True'
+      sensitiveDataDiscoveryEnabled: 'True'
+    }
+    storageAccountsPricingTier: 'Standard'
+    virtualMachinesPricingTier: 'Standard'
   }
 }
 ```
@@ -84,8 +102,54 @@ module securityCenter 'br/public:avm/ptn/security/security-center:<version>' = {
       "value": "<workspaceResourceId>"
     },
     // Non-required parameters
+    "appServicesPricingTier": {
+      "value": "Standard"
+    },
+    "armPricingTier": {
+      "value": "Standard"
+    },
+    "containerRegistryPricingTier": {
+      "value": "Standard"
+    },
+    "containersTier": {
+      "value": "Standard"
+    },
+    "cosmosDbsTier": {
+      "value": "Standard"
+    },
+    "dnsPricingTier": {
+      "value": "Standard"
+    },
+    "keyVaultsPricingTier": {
+      "value": "Standard"
+    },
+    "kubernetesServicePricingTier": {
+      "value": "Standard"
+    },
     "location": {
       "value": "<location>"
+    },
+    "openSourceRelationalDatabasesTier": {
+      "value": "Standard"
+    },
+    "sqlServersPricingTier": {
+      "value": "Standard"
+    },
+    "sqlServerVirtualMachinesPricingTier": {
+      "value": "Standard"
+    },
+    "storageAccountsMalwareScanningSettings": {
+      "value": {
+        "capGBPerMonthPerStorageAccount": 5000,
+        "onUploadMalwareScanningEnabled": "True",
+        "sensitiveDataDiscoveryEnabled": "True"
+      }
+    },
+    "storageAccountsPricingTier": {
+      "value": "Standard"
+    },
+    "virtualMachinesPricingTier": {
+      "value": "Standard"
     }
   }
 }
@@ -105,7 +169,25 @@ using 'br/public:avm/ptn/security/security-center:<version>'
 param scope = '<scope>'
 param workspaceResourceId = '<workspaceResourceId>'
 // Non-required parameters
+param appServicesPricingTier = 'Standard'
+param armPricingTier = 'Standard'
+param containerRegistryPricingTier = 'Standard'
+param containersTier = 'Standard'
+param cosmosDbsTier = 'Standard'
+param dnsPricingTier = 'Standard'
+param keyVaultsPricingTier = 'Standard'
+param kubernetesServicePricingTier = 'Standard'
 param location = '<location>'
+param openSourceRelationalDatabasesTier = 'Standard'
+param sqlServersPricingTier = 'Standard'
+param sqlServerVirtualMachinesPricingTier = 'Standard'
+param storageAccountsMalwareScanningSettings = {
+  capGBPerMonthPerStorageAccount: 5000
+  onUploadMalwareScanningEnabled: 'True'
+  sensitiveDataDiscoveryEnabled: 'True'
+}
+param storageAccountsPricingTier = 'Standard'
+param virtualMachinesPricingTier = 'Standard'
 ```
 
 </details>
@@ -129,9 +211,18 @@ module securityCenter 'br/public:avm/ptn/security/security-center:<version>' = {
     scope: '<scope>'
     workspaceResourceId: '<workspaceResourceId>'
     // Non-required parameters
+    appServicesPricingTier: 'Standard'
+    armPricingTier: 'Standard'
+    containerRegistryPricingTier: 'Standard'
+    containersTier: 'Standard'
+    cosmosDbsTier: 'Standard'
     deviceSecurityGroupProperties: {}
+    dnsPricingTier: 'Standard'
     ioTSecuritySolutionProperties: {}
+    keyVaultsPricingTier: 'Standard'
+    kubernetesServicePricingTier: 'Standard'
     location: '<location>'
+    openSourceRelationalDatabasesTier: 'Standard'
     securityContactProperties: {
       emails: 'foo@contoso.com'
       isEnabled: true
@@ -143,15 +234,24 @@ module securityCenter 'br/public:avm/ptn/security/security-center:<version>' = {
       }
       notificationsSources: [
         {
-          sourceType: 'Alert'
           minimalSeverity: 'High'
+          sourceType: 'Alert'
         }
         {
-          sourceType: 'AttackPath'
           minimalRiskLevel: 'High'
+          sourceType: 'AttackPath'
         }
       ]
     }
+    sqlServersPricingTier: 'Standard'
+    sqlServerVirtualMachinesPricingTier: 'Standard'
+    storageAccountsMalwareScanningSettings: {
+      capGBPerMonthPerStorageAccount: 5000
+      onUploadMalwareScanningEnabled: 'True'
+      sensitiveDataDiscoveryEnabled: 'True'
+    }
+    storageAccountsPricingTier: 'Standard'
+    virtualMachinesPricingTier: 'Standard'
   }
 }
 ```
@@ -176,14 +276,41 @@ module securityCenter 'br/public:avm/ptn/security/security-center:<version>' = {
       "value": "<workspaceResourceId>"
     },
     // Non-required parameters
+    "appServicesPricingTier": {
+      "value": "Standard"
+    },
+    "armPricingTier": {
+      "value": "Standard"
+    },
+    "containerRegistryPricingTier": {
+      "value": "Standard"
+    },
+    "containersTier": {
+      "value": "Standard"
+    },
+    "cosmosDbsTier": {
+      "value": "Standard"
+    },
     "deviceSecurityGroupProperties": {
       "value": {}
+    },
+    "dnsPricingTier": {
+      "value": "Standard"
     },
     "ioTSecuritySolutionProperties": {
       "value": {}
     },
+    "keyVaultsPricingTier": {
+      "value": "Standard"
+    },
+    "kubernetesServicePricingTier": {
+      "value": "Standard"
+    },
     "location": {
       "value": "<location>"
+    },
+    "openSourceRelationalDatabasesTier": {
+      "value": "Standard"
     },
     "securityContactProperties": {
       "value": {
@@ -197,15 +324,34 @@ module securityCenter 'br/public:avm/ptn/security/security-center:<version>' = {
         },
         "notificationsSources": [
           {
-            "sourceType": "Alert",
-            "minimalSeverity": "High"
+            "minimalSeverity": "High",
+            "sourceType": "Alert"
           },
           {
-            "sourceType": "AttackPath",
-            "minimalRiskLevel": "High"
+            "minimalRiskLevel": "High",
+            "sourceType": "AttackPath"
           }
         ]
       }
+    },
+    "sqlServersPricingTier": {
+      "value": "Standard"
+    },
+    "sqlServerVirtualMachinesPricingTier": {
+      "value": "Standard"
+    },
+    "storageAccountsMalwareScanningSettings": {
+      "value": {
+        "capGBPerMonthPerStorageAccount": 5000,
+        "onUploadMalwareScanningEnabled": "True",
+        "sensitiveDataDiscoveryEnabled": "True"
+      }
+    },
+    "storageAccountsPricingTier": {
+      "value": "Standard"
+    },
+    "virtualMachinesPricingTier": {
+      "value": "Standard"
     }
   }
 }
@@ -225,29 +371,47 @@ using 'br/public:avm/ptn/security/security-center:<version>'
 param scope = '<scope>'
 param workspaceResourceId = '<workspaceResourceId>'
 // Non-required parameters
+param appServicesPricingTier = 'Standard'
+param armPricingTier = 'Standard'
+param containerRegistryPricingTier = 'Standard'
+param containersTier = 'Standard'
+param cosmosDbsTier = 'Standard'
 param deviceSecurityGroupProperties = {}
+param dnsPricingTier = 'Standard'
 param ioTSecuritySolutionProperties = {}
+param keyVaultsPricingTier = 'Standard'
+param kubernetesServicePricingTier = 'Standard'
 param location = '<location>'
+param openSourceRelationalDatabasesTier = 'Standard'
 param securityContactProperties = {
-emails: 'foo@contoso.com'
-isEnabled: true
-notificationsByRole: {
-  roles: [
-    'owner'
+  emails: 'foo@contoso.com'
+  isEnabled: true
+  notificationsByRole: {
+    roles: [
+      'owner'
+    ]
+    state: 'On'
+  }
+  notificationsSources: [
+    {
+      minimalSeverity: 'High'
+      sourceType: 'Alert'
+    }
+    {
+      minimalRiskLevel: 'High'
+      sourceType: 'AttackPath'
+    }
   ]
-  state: 'On'
 }
-notificationsSources: [
-  {
-    sourceType: 'Alert'
-    minimalSeverity: 'High'
-  }
-  {
-    sourceType: 'AttackPath'
-    minimalRiskLevel: 'High'
-  }
-]
+param sqlServersPricingTier = 'Standard'
+param sqlServerVirtualMachinesPricingTier = 'Standard'
+param storageAccountsMalwareScanningSettings = {
+  capGBPerMonthPerStorageAccount: 5000
+  onUploadMalwareScanningEnabled: 'True'
+  sensitiveDataDiscoveryEnabled: 'True'
 }
+param storageAccountsPricingTier = 'Standard'
+param virtualMachinesPricingTier = 'Standard'
 ```
 
 </details>
@@ -271,7 +435,25 @@ module securityCenter 'br/public:avm/ptn/security/security-center:<version>' = {
     scope: '<scope>'
     workspaceResourceId: '<workspaceResourceId>'
     // Non-required parameters
+    appServicesPricingTier: 'Standard'
+    armPricingTier: 'Standard'
+    containerRegistryPricingTier: 'Standard'
+    containersTier: 'Standard'
+    cosmosDbsTier: 'Standard'
+    dnsPricingTier: 'Standard'
+    keyVaultsPricingTier: 'Standard'
+    kubernetesServicePricingTier: 'Standard'
     location: '<location>'
+    openSourceRelationalDatabasesTier: 'Standard'
+    sqlServersPricingTier: 'Standard'
+    sqlServerVirtualMachinesPricingTier: 'Standard'
+    storageAccountsMalwareScanningSettings: {
+      capGBPerMonthPerStorageAccount: 5000
+      onUploadMalwareScanningEnabled: 'True'
+      sensitiveDataDiscoveryEnabled: 'True'
+    }
+    storageAccountsPricingTier: 'Standard'
+    virtualMachinesPricingTier: 'Standard'
   }
 }
 ```
@@ -296,8 +478,54 @@ module securityCenter 'br/public:avm/ptn/security/security-center:<version>' = {
       "value": "<workspaceResourceId>"
     },
     // Non-required parameters
+    "appServicesPricingTier": {
+      "value": "Standard"
+    },
+    "armPricingTier": {
+      "value": "Standard"
+    },
+    "containerRegistryPricingTier": {
+      "value": "Standard"
+    },
+    "containersTier": {
+      "value": "Standard"
+    },
+    "cosmosDbsTier": {
+      "value": "Standard"
+    },
+    "dnsPricingTier": {
+      "value": "Standard"
+    },
+    "keyVaultsPricingTier": {
+      "value": "Standard"
+    },
+    "kubernetesServicePricingTier": {
+      "value": "Standard"
+    },
     "location": {
       "value": "<location>"
+    },
+    "openSourceRelationalDatabasesTier": {
+      "value": "Standard"
+    },
+    "sqlServersPricingTier": {
+      "value": "Standard"
+    },
+    "sqlServerVirtualMachinesPricingTier": {
+      "value": "Standard"
+    },
+    "storageAccountsMalwareScanningSettings": {
+      "value": {
+        "capGBPerMonthPerStorageAccount": 5000,
+        "onUploadMalwareScanningEnabled": "True",
+        "sensitiveDataDiscoveryEnabled": "True"
+      }
+    },
+    "storageAccountsPricingTier": {
+      "value": "Standard"
+    },
+    "virtualMachinesPricingTier": {
+      "value": "Standard"
     }
   }
 }
@@ -317,7 +545,25 @@ using 'br/public:avm/ptn/security/security-center:<version>'
 param scope = '<scope>'
 param workspaceResourceId = '<workspaceResourceId>'
 // Non-required parameters
+param appServicesPricingTier = 'Standard'
+param armPricingTier = 'Standard'
+param containerRegistryPricingTier = 'Standard'
+param containersTier = 'Standard'
+param cosmosDbsTier = 'Standard'
+param dnsPricingTier = 'Standard'
+param keyVaultsPricingTier = 'Standard'
+param kubernetesServicePricingTier = 'Standard'
 param location = '<location>'
+param openSourceRelationalDatabasesTier = 'Standard'
+param sqlServersPricingTier = 'Standard'
+param sqlServerVirtualMachinesPricingTier = 'Standard'
+param storageAccountsMalwareScanningSettings = {
+  capGBPerMonthPerStorageAccount: 5000
+  onUploadMalwareScanningEnabled: 'True'
+  sensitiveDataDiscoveryEnabled: 'True'
+}
+param storageAccountsPricingTier = 'Standard'
+param virtualMachinesPricingTier = 'Standard'
 ```
 
 </details>
@@ -353,6 +599,7 @@ param location = '<location>'
 | [`securityContactProperties`](#parameter-securitycontactproperties) | object | Security contact data. |
 | [`sqlServersPricingTier`](#parameter-sqlserverspricingtier) | string | The pricing tier value for SqlServers. Azure Security Center is provided in two pricing tiers: free and standard, with the standard tier available with a trial period. The standard tier offers advanced security capabilities, while the free tier offers basic security features. - Free or Standard. |
 | [`sqlServerVirtualMachinesPricingTier`](#parameter-sqlservervirtualmachinespricingtier) | string | The pricing tier value for SqlServerVirtualMachines. Azure Security Center is provided in two pricing tiers: free and standard, with the standard tier available with a trial period. The standard tier offers advanced security capabilities, while the free tier offers basic security features. - Free or Standard. |
+| [`storageAccountsMalwareScanningSettings`](#parameter-storageaccountsmalwarescanningsettings) | object | If the pricing tier value for StorageAccounts is Standard. Choose the settings for malware scanning. |
 | [`storageAccountsPricingTier`](#parameter-storageaccountspricingtier) | string | The pricing tier value for StorageAccounts. Azure Security Center is provided in two pricing tiers: free and standard, with the standard tier available with a trial period. The standard tier offers advanced security capabilities, while the free tier offers basic security features. - Free or Standard. |
 | [`virtualMachinesPricingTier`](#parameter-virtualmachinespricingtier) | string | The pricing tier value for VMs. Azure Security Center is provided in two pricing tiers: free and standard, with the standard tier available with a trial period. The standard tier offers advanced security capabilities, while the free tier offers basic security features. - Free or Standard. |
 
@@ -589,6 +836,61 @@ The pricing tier value for SqlServerVirtualMachines. Azure Security Center is pr
     'Standard'
   ]
   ```
+
+### Parameter: `storageAccountsMalwareScanningSettings`
+
+If the pricing tier value for StorageAccounts is Standard. Choose the settings for malware scanning.
+
+- Required: No
+- Type: object
+
+**Required parameters**
+
+| Parameter | Type | Description |
+| :-- | :-- | :-- |
+| [`onUploadMalwareScanningEnabled`](#parameter-storageaccountsmalwarescanningsettingsonuploadmalwarescanningenabled) | string | Enable or disable on-upload malware scanning for storage accounts. - True or False. |
+| [`sensitiveDataDiscoveryEnabled`](#parameter-storageaccountsmalwarescanningsettingssensitivedatadiscoveryenabled) | string | Enable or disable sensitive data discovery for storage accounts. - True or False. |
+
+**Optional parameters**
+
+| Parameter | Type | Description |
+| :-- | :-- | :-- |
+| [`capGBPerMonthPerStorageAccount`](#parameter-storageaccountsmalwarescanningsettingscapgbpermonthperstorageaccount) | int | If on-upload malware scanning is enabled, set a cap for the amount of GB per month per storage account that can be scanned. If not set, there will be no cap applied. |
+
+### Parameter: `storageAccountsMalwareScanningSettings.onUploadMalwareScanningEnabled`
+
+Enable or disable on-upload malware scanning for storage accounts. - True or False.
+
+- Required: Yes
+- Type: string
+- Allowed:
+  ```Bicep
+  [
+    'False'
+    'True'
+  ]
+  ```
+
+### Parameter: `storageAccountsMalwareScanningSettings.sensitiveDataDiscoveryEnabled`
+
+Enable or disable sensitive data discovery for storage accounts. - True or False.
+
+- Required: Yes
+- Type: string
+- Allowed:
+  ```Bicep
+  [
+    'False'
+    'True'
+  ]
+  ```
+
+### Parameter: `storageAccountsMalwareScanningSettings.capGBPerMonthPerStorageAccount`
+
+If on-upload malware scanning is enabled, set a cap for the amount of GB per month per storage account that can be scanned. If not set, there will be no cap applied.
+
+- Required: No
+- Type: int
 
 ### Parameter: `storageAccountsPricingTier`
 
